@@ -13,7 +13,6 @@ import me.freack100.dynamicbungee.DynamicBungee;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.StringTokenizer;
 
 public class ClientThread extends Thread {
 
@@ -28,12 +27,27 @@ public class ClientThread extends Thread {
         this.socket = socket;
     }
 
-    public void run(){
-        try{
+    public void run() {
+        try {
             inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outToClient = new DataOutputStream(socket.getOutputStream());
 
-        } catch (Exception e){
+            String[] message = inFromClient.readLine().split(";");
+            if (message[0].equals("create")) {
+                plugin.addServer(message[1], message[2], Integer.parseInt(message[3]));
+            } else if (message[0].equals("remove")) {
+                plugin.removeServer(message[1]);
+            }
+
+            outToClient.writeBytes("Success");
+
+            outToClient.flush();
+
+            inFromClient.close();
+            outToClient.close();
+            socket.close();
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
